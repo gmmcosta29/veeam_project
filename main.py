@@ -1,8 +1,7 @@
-import os
 from time import strftime, localtime, sleep
 from signal import signal, SIGINT
-from os import listdir
-from os.path import exists
+from os import listdir, system, remove, rmdir
+from os.path import exists,isdir
 from hashlib import md5
 
 
@@ -32,7 +31,7 @@ def compare_files(file1, file2):
 def compare_folders(folder1, folder2, log_file):
     files1 = listdir(folder1)
     if not exists(folder2):
-        os.system('mkdir ' + folder2)
+        system('mkdir ' + folder2)
         log(folder2 + ' directory was created', log_path=log_file)
 
     files2 = listdir(folder2)
@@ -42,13 +41,13 @@ def compare_folders(folder1, folder2, log_file):
 
     for file in files1:
         if file in files2:
-            if not os.path.isdir(folder1 + "/" + file):
+            if not isdir(folder1 + "/" + file):
                 if not compare_files(folder1 + "/" + file, folder2 + "/" + file):
                     return False
             else:
                 if not exists(folder2 + "/" + file):
                     path = folder2 + "/" + file
-                    os.system('mkdir ' + path)
+                    system('mkdir ' + path)
                     log(path + ' directory was created', log_path=log_file)
 
                 if not compare_folders(folder1 + "/" + file, folder2 + "/" + file, log_file):
@@ -61,15 +60,15 @@ def compare_folders(folder1, folder2, log_file):
 def removeDir(path, log_file):
     files = listdir(path)
     if len(files) == 0:
-        os.rmdir(path)
+        rmdir(path)
         log(path + ' was deleted', log_path=log_file)
 
     else:
         for file in files:
             file_path = path + '/' + file
-            if not os.path.isdir(path + "/" + file):
+            if not isdir(path + "/" + file):
                 # file
-                os.remove(file_path)
+                remove(file_path)
                 log(file_path + ' was deleted', log_path=log_file)
             else:
                 # dir
@@ -83,26 +82,26 @@ def syncfolders(original_path, replica_path, log_file):
     files_backup = listdir(replica_path)
 
     for file in files_backup:
-        if not os.path.isdir(original_path + "/" + file):
+        if not isdir(original_path + "/" + file):
             if file in files_original:
                 if not compare_files(original_path + '/' + file, replica_path + '/' + file):
                     # file exists but was modified
-                    os.remove(replica_path + '/' + file)
+                    remove(replica_path + '/' + file)
                     log(file + ' was deleted', log_path=log_file)
-                    os.system('cp ' + original_path + '/' + file + ' ' + replica_path)
+                    system('cp ' + original_path + '/' + file + ' ' + replica_path)
                     log(file + ' was created', log_path=log_file)
             if file not in files_original:
                 try:
-                    os.remove(replica_path + '/' + file)
+                    remove(replica_path + '/' + file)
                 except IsADirectoryError:
                     removeDir(replica_path + '/' + file, log_file)
         else:
             # is a dir
             syncfolders(original_path + "/" + file, replica_path + "/" + file, log_file)
     for file in files_original:
-        if not os.path.isdir(original_path + "/" + file):
+        if not isdir(original_path + "/" + file):
             if file not in files_backup:
-                os.system('cp ' + original_path + '/' + file + ' ' + replica_path + "/" + file)
+                system('cp ' + original_path + '/' + file + ' ' + replica_path + "/" + file)
                 log(file + ' was copied', log_path=log_file)
         else:
             syncfolders(original_path + "/" + file, replica_path + "/" + file, log_file)
