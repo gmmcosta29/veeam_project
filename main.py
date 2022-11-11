@@ -112,10 +112,10 @@ if __name__ == '__main__':
     print("Periodical backup running ")
     print("To end the program press CTR + C")
     src = input("Provide the original folder path\n")
-    file_exists = exists(src)
+    file_exists = exists(src) and isdir(src)
     while not file_exists:
         src = input("Path inserted does not exist, please insert a valid path\n")
-        file_exists = exists(src)
+        file_exists = exists(src) and isdir(src)
 
     dst = input("Provide the replicated folder path\n")
     synctime = -1
