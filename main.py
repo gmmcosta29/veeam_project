@@ -1,7 +1,7 @@
 from time import strftime, localtime, sleep
 from signal import signal, SIGINT
 from os import listdir, system, remove, rmdir
-from os.path import exists,isdir
+from os.path import exists, isdir
 from hashlib import md5
 
 
